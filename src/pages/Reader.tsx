@@ -1,14 +1,13 @@
-
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Home } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
-import 'react-pdf/dist/Page/TextLayer.css';
+import "react-pdf/dist/Page/TextLayer.css";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Set up PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 const Reader = () => {
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -30,9 +29,9 @@ const Reader = () => {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" && currentPage < (numPages || 0)) {
-        setCurrentPage(prev => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0));
+        setCurrentPage((prev) => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0));
       } else if (e.key === "ArrowLeft" && currentPage > 1) {
-        setCurrentPage(prev => Math.max(prev - (showTwoPages ? 2 : 1), 1));
+        setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1));
       }
     };
 
@@ -56,39 +55,48 @@ const Reader = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-sm border-b z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <Home size={20} />
-            <span>Home</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">
-              Page {currentPage} of {numPages}
-            </span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(prev => Math.max(prev - (showTwoPages ? 2 : 1), 1))}
-                disabled={currentPage <= 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(prev => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0))}
-                disabled={currentPage >= (numPages || 0)}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <nav className="fixed top-0 w-full bg-gradient-to-b from-[#09001a]/90 to-[#240046]/80 backdrop-blur-lg border-b border-[#7209b7]/50 shadow-lg z-50">
+  <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <Link to="/">
+      <Button
+        variant="ghost"
+        className="flex items-center gap-2 text-[#dad8f7] hover:text-white transition-colors"
+      >
+        <Home size={20} />
+        <span>Home</span>
+      </Button>
+    </Link>
+    <div className="flex items-center gap-4">
+      <span className="text-sm text-gray-400">
+        Page {currentPage} of {numPages}
+      </span>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          className="border-[#f72585] text-[#f72585] hover:border-[#ff006e] hover:text-[#ff006e]"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1))}
+          disabled={currentPage <= 1}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="border-[#4cc9f0] text-[#4cc9f0] hover:border-[#4361ee] hover:text-[#4361ee]"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0))}
+          disabled={currentPage >= (numPages || 0)}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  </div>
+</nav>
 
-      <main className="container mx-auto px-4 pt-24 pb-12">
+
+      <main className="container mx-auto px-4 pt-24 pb-12 flex-grow flex flex-col items-center">
+
         <motion.div
           ref={documentRef}
           initial={{ opacity: 0 }}
@@ -97,11 +105,7 @@ const Reader = () => {
           className="flex justify-center"
           onMouseUp={handleTextSelection}
         >
-          <Document
-            file="/sample.pdf"
-            onLoadSuccess={onDocumentLoadSuccess}
-            className="flex gap-4 justify-center"
-          >
+          <Document file="/sample.pdf" onLoadSuccess={onDocumentLoadSuccess} className="flex gap-4 justify-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPage}

@@ -1,29 +1,20 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --background: #09001a;
+    --foreground: #f8f9fa;
+    --card: rgba(36, 0, 70, 0.75);
+    --card-foreground: #ff0080;
+    --primary: #8a2be2;
+    --primary-foreground: #f8f9fa;
+    --secondary: #3a0ca3;
+    --secondary-foreground: #f8f9fa;
+    --accent: #ff00ff;
+    --muted: #4cc9f0;
+    --border: #ff1493;
     --radius: 0.75rem;
   }
 }
@@ -34,31 +25,128 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-  }
-  .react-pdf__Page {
-    @apply max-w-full;
-  }
-  .react-pdf__Page__canvas {
-    @apply max-w-full h-auto !important;
+    font-family: 'Orbitron', sans-serif;
   }
 }
 
-/* Custom scrollbar styles */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* 🔥 Background Gradient */
+body {
+  background: linear-gradient(180deg, #09001a 0%, #1b0063 50%, #4c0076 100%);
+  background-size: cover;
+  background-attachment: fixed;
+  position: relative;
+  overflow-x: hidden;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+/* 🔥 Animated Grid Overlay */
+body::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('/synthwave-grid.png');
+  background-size: 600px 600px; /* Adjust grid size */
+  background-repeat: repeat;
+  opacity: 0.25; /* Adjust transparency */
+  z-index: -1;
+  animation: moveGrid 20s infinite linear;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+@keyframes moveGrid {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 100px 100px; /* Moves the grid diagonally */
+  }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+/* 🎨 Button Styling */
+button {
+  background: linear-gradient(135deg, #ff1493, #8a2be2);
+  border: none;
+  color: white;
+  padding: 14px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  text-transform: uppercase;
+  box-shadow: 0 0 12px rgba(255, 20, 147, 0.8);
+  transition: 0.3s ease-in-out;
+}
+
+button:hover {
+  box-shadow: 0 0 20px rgba(255, 20, 147, 1), 0 0 30px #8a2be2;
+  transform: scale(1.07);
+}
+
+/* 🔥 Text Shadows for Headers */
+h1, h2, h3 {
+  text-shadow: 0 0 12px rgba(255, 0, 128, 0.8), 0 0 24px rgba(138, 43, 226, 0.6);
+  font-weight: bold;
+}
+
+/* 🟣 Glassmorphic Cards */
+.card {
+  background: rgba(36, 0, 70, 0.55);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px rgba(255, 20, 147, 0.4);
+  border-radius: 12px;
+  padding: 20px;
+  transition: 0.3s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 0 25px rgba(255, 0, 128, 0.7);
+  transform: scale(1.05);
+}
+
+/* ✨ Links with Glow Effect */
+a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+}
+
+a:hover {
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--muted), 0 0 20px var(--accent);
+}
+
+/* 🔥 Footer Blending with Body */
+.footer {
+  background: linear-gradient(90deg, #7209b7, #ff006e);
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 14px;
+  box-shadow: 0 0 20px rgba(255, 20, 147, 0.7);
+  backdrop-filter: blur(12px);
+  width: 100%;
+  z-index: 50;
+  position: relative;
+}
+
+.footer::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 15px;
+  background: linear-gradient(to top, rgba(255, 0, 128, 0.4), transparent);
+  bottom: -10px;
+  left: 0;
+}
+
+/* 📄 PDF Page Styling */
+.react-pdf__Page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 100%;
+}
+
+.react-pdf__Page__canvas {
+  max-width: 100% !important;
+  height: auto !important;
+  box-shadow: 0 0 20px #4cc9f0;
+  border-radius: var(--radius);
 }
