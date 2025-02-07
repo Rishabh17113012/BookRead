@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Home } from "lucide-react";
+import { ChevronLeft, ChevronRight, Home, Bookmark, BookmarkCheck } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
 
@@ -10,14 +10,28 @@ pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 const Reader = () => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [showTwoPages, setShowTwoPages] = useState(window.innerWidth >= 1024);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   // Get selected PDF from URL
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const file = queryParams.get("file");
+
+  // Load Saved Progress & Bookmarks
+  useEffect(() => {
+    const savedPage = localStorage.getItem(`pdf_progress_${file}`);
+    if (savedPage) setCurrentPage(parseInt(savedPage, 10));
+
+    const savedBookmarks = localStorage.getItem(`pdf_bookmarks_${file}`);
+    if (savedBookmarks) setBookmarks(JSON.parse(savedBookmarks));
+  }, [file]);
+
+  // Save Progress when Page Changes
+  useEffect(() => {
+    if (file) localStorage.setItem(`pdf_progress_${file}`, currentPage.toString());
+  }, [currentPage, file]);
 
   // Handle Window Resize
   useEffect(() => {
@@ -43,26 +57,22 @@ const Reader = () => {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [currentPage, numPages, showTwoPages]);
 
-  // Handle Swipe Gestures (Mobile & Tablets)
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
+  // Handle Bookmark Toggle
+  const toggleBookmark = () => {
+    setBookmarks((prev) => {
+      const updatedBookmarks = prev.includes(currentPage)
+        ? prev.filter((page) => page !== currentPage)
+        : [...prev, currentPage];
+
+      localStorage.setItem(`pdf_bookmarks_${file}`, JSON.stringify(updatedBookmarks));
+      return updatedBookmarks;
+    });
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStartX) return;
-
-    const touchEndX = e.changedTouches[0].clientX;
-    const deltaX = touchStartX - touchEndX;
-
-    if (deltaX > 50 && currentPage < (numPages || 0)) {
-      // Swipe Left - Next Page
-      setCurrentPage((prev) => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0));
-    } else if (deltaX < -50 && currentPage > 1) {
-      // Swipe Right - Previous Page
-      setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1));
-    }
-
-    setTouchStartX(null);
+  // Go to Bookmarked Page with Smooth Scroll
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    document.getElementById("pdf-container")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -98,14 +108,21 @@ const Reader = () => {
             <ChevronRight size={20} />
           </Button>
         </div>
+
+        {/* Bookmark Button */}
+        <Button
+          onClick={toggleBookmark}
+          variant="ghost"
+          className="text-white hover:text-yellow-400"
+        >
+          {bookmarks.includes(currentPage) ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
+        </Button>
       </nav>
 
-      {/* PDF Viewer - Prevents Sliding Above Navbar */}
+      {/* PDF Viewer */}
       <main
+        id="pdf-container"
         className="container mx-auto px-4 pt-20 pb-12 flex-grow flex flex-col items-center"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        style={{ marginTop: "4rem" }} // Keeps content below navbar
       >
         <div className="flex justify-center">
           <Document
@@ -130,6 +147,26 @@ const Reader = () => {
             )}
           </Document>
         </div>
+
+        {/* Bookmarked Pages List */}
+        {bookmarks.length > 0 && (
+          <div className="mt-6 bg-white shadow-md p-4 rounded-lg w-80">
+            <h3 className="text-lg font-semibold text-gray-800">Bookmarked Pages</h3>
+            <ul className="mt-2 text-sm text-gray-600">
+              {bookmarks.map((page) => (
+                <li
+                  key={page}
+                  className={`cursor-pointer py-1 px-2 rounded ${
+                    page === currentPage ? "bg-blue-100 text-blue-600 font-semibold" : "hover:text-blue-500"
+                  }`}
+                  onClick={() => goToPage(page)}
+                >
+                  Page {page}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </main>
     </div>
   );
