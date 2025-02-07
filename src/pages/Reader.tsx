@@ -11,7 +11,8 @@ const Reader = () => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [showTwoPages, setShowTwoPages] = useState(window.innerWidth >= 1024);
-  
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
   // Get selected PDF from URL
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -20,6 +21,7 @@ const Reader = () => {
   useEffect(() => {
     const handleResize = () => {
       setShowTwoPages(window.innerWidth >= 1024);
+      setIsMobile(window.innerWidth < 768);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -45,7 +47,7 @@ const Reader = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
+    <div className="min-h-screen bg-[#F8F9FA] overflow-hidden">
       {/* Navbar */}
       <nav className="fixed top-0 w-full bg-gradient-to-b from-[#09001a]/90 to-[#240046]/80 backdrop-blur-lg border-b border-[#7209b7]/50 shadow-lg z-50 flex justify-between items-center px-4 h-16">
         {/* Home Button */}
@@ -96,21 +98,21 @@ const Reader = () => {
           <Document
             file={`/${file}`}
             onLoadSuccess={onDocumentLoadSuccess}
-            className="flex justify-center gap-1 lg:gap-1" // Reduced space between pages
+            className="flex justify-center gap-1 lg:gap-2"
           >
             <div className="flex flex-col items-center">
               <Page
                 pageNumber={currentPage}
-                className="shadow-lg bg-white"
-                width={window.innerWidth > 1024 ? 600 : undefined} // Increased width
+                className="shadow-lg bg-white rounded-lg"
+                width={isMobile ? window.innerWidth - 40 : 600} // Full width on mobile, 600px on desktop
               />
             </div>
-            {showTwoPages && currentPage + 1 <= (numPages || 0) && (
+            {showTwoPages && currentPage + 1 <= (numPages || 0) && !isMobile && (
               <div className="flex flex-col items-center">
                 <Page
                   pageNumber={currentPage + 1}
-                  className="shadow-lg bg-white"
-                  width={window.innerWidth > 1024 ? 600 : undefined} // Increased width
+                  className="shadow-lg bg-white rounded-lg"
+                  width={600} // Second page only on desktop
                 />
               </div>
             )}
