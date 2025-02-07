@@ -13,6 +13,7 @@ const Reader = () => {
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [showTwoPages, setShowTwoPages] = useState(window.innerWidth >= 1024);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   // Get selected PDF from URL
   const location = useLocation();
@@ -75,6 +76,28 @@ const Reader = () => {
     document.getElementById("pdf-container")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Handle Touch Start (Swipe Detection)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  // Handle Touch End (Detect Swipe Direction)
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartX) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchDiff = touchStartX - touchEndX;
+
+    if (touchDiff > 50 && currentPage < (numPages || 0)) {
+      // Swipe Left (Next Page)
+      setCurrentPage((prev) => Math.min(prev + 1, numPages || 0));
+    } else if (touchDiff < -50 && currentPage > 1) {
+      // Swipe Right (Previous Page)
+      setCurrentPage((prev) => Math.max(prev - 1, 1));
+    }
+
+    setTouchStartX(null);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9FA] overflow-hidden">
       {/* Navbar */}
@@ -123,6 +146,8 @@ const Reader = () => {
       <main
         id="pdf-container"
         className="container mx-auto px-4 pt-20 pb-12 flex-grow flex flex-col items-center"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <div className="flex justify-center">
           <Document
@@ -147,26 +172,6 @@ const Reader = () => {
             )}
           </Document>
         </div>
-
-        {/* Bookmarked Pages List */}
-        {bookmarks.length > 0 && (
-          <div className="mt-6 bg-white shadow-md p-4 rounded-lg w-80">
-            <h3 className="text-lg font-semibold text-gray-800">Bookmarked Pages</h3>
-            <ul className="mt-2 text-sm text-gray-600">
-              {bookmarks.map((page) => (
-                <li
-                  key={page}
-                  className={`cursor-pointer py-1 px-2 rounded ${
-                    page === currentPage ? "bg-blue-100 text-blue-600 font-semibold" : "hover:text-blue-500"
-                  }`}
-                  onClick={() => goToPage(page)}
-                >
-                  Page {page}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </main>
     </div>
   );
