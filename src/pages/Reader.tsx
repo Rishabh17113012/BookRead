@@ -13,12 +13,14 @@ const Reader = () => {
   const [showTwoPages, setShowTwoPages] = useState(window.innerWidth >= 1024);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   // Get selected PDF from URL
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const file = queryParams.get("file");
 
+  // Handle Window Resize
   useEffect(() => {
     const handleResize = () => {
       setShowTwoPages(window.innerWidth >= 1024);
@@ -28,12 +30,11 @@ const Reader = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Handle Keyboard Navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" && currentPage < (numPages || 0)) {
-        setCurrentPage((prev) =>
-          Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0)
-        );
+        setCurrentPage((prev) => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0));
       } else if (e.key === "ArrowLeft" && currentPage > 1) {
         setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1));
       }
@@ -43,7 +44,7 @@ const Reader = () => {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [currentPage, numPages, showTwoPages]);
 
-  // Full-Screen Toggle Function
+  // Toggle Fullscreen Mode
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
@@ -54,7 +55,7 @@ const Reader = () => {
     }
   };
 
-  // Listen for Full-Screen Exit
+  // Listen for Fullscreen Exit
   useEffect(() => {
     const handleFullScreenChange = () => {
       setIsFullScreen(!!document.fullscreenElement);
@@ -63,48 +64,60 @@ const Reader = () => {
     return () => document.removeEventListener("fullscreenchange", handleFullScreenChange);
   }, []);
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
+  // Handle Swipe Gestures (Mobile & Tablets)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartX) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const deltaX = touchStartX - touchEndX;
+
+    if (deltaX > 50 && currentPage < (numPages || 0)) {
+      // Swipe Left - Next Page
+      setCurrentPage((prev) => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0));
+    } else if (deltaX < -50 && currentPage > 1) {
+      // Swipe Right - Previous Page
+      setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1));
+    }
+
+    setTouchStartX(null);
   };
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] overflow-hidden">
       {/* Navbar - Hidden in Fullscreen Mode */}
       {!isFullScreen && (
-        <nav className="fixed top-0 w-full bg-gradient-to-b from-[#09001a]/90 to-[#240046]/80 backdrop-blur-lg border-b border-[#7209b7]/50 shadow-lg z-50 flex justify-between items-center px-4 h-16">
+        <nav className="fixed top-0 w-full bg-[#09001a] text-white py-2 px-4 flex items-center justify-between shadow-md z-50">
           {/* Home Button */}
           <Link to="/">
-            <Button variant="ghost" className="text-[#dad8f7] hover:text-white">
+            <Button variant="ghost" className="text-white hover:text-gray-300">
               <Home size={20} />
-              <span>Home</span>
             </Button>
           </Link>
 
-          {/* Navigation Controls (Centered) */}
-          <div className="flex gap-4">
+          {/* Navigation & Page Number */}
+          <div className="flex items-center gap-4">
             <Button
               variant="outline"
-              size="icon"
-              className="border-[#f72585] text-[#f72585] hover:border-[#ff006e] hover:text-[#ff006e]"
-              onClick={() =>
-                setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1))
-              }
+              className="border-gray-300 text-gray-300 hover:border-white hover:text-white"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage <= 1}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft size={20} />
             </Button>
+            <span className="text-sm text-gray-300">
+              Page {currentPage} of {numPages}
+            </span>
             <Button
               variant="outline"
-              size="icon"
-              className="border-[#4cc9f0] text-[#4cc9f0] hover:border-[#4361ee] hover:text-[#4361ee]"
-              onClick={() =>
-                setCurrentPage((prev) =>
-                  Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0)
-                )
-              }
+              className="border-gray-300 text-gray-300 hover:border-white hover:text-white"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, numPages || 0))}
               disabled={currentPage >= (numPages || 0)}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight size={20} />
             </Button>
           </div>
 
@@ -116,11 +129,6 @@ const Reader = () => {
             <Maximize size={20} />
             Fullscreen
           </button>
-
-          {/* Page Number on the Right */}
-          <span className="text-sm text-gray-300">
-            Page {currentPage} of {numPages}
-          </span>
         </nav>
       )}
 
@@ -134,29 +142,35 @@ const Reader = () => {
         </button>
       )}
 
-      {/* PDF Viewer */}
-      <main className="container mx-auto px-4 pt-20 pb-12 flex-grow flex flex-col items-center">
+      {/* PDF Viewer - Prevents Sliding Above Navbar */}
+      <main
+        className={`container mx-auto px-4 ${isFullScreen ? "pt-4 pb-4" : "pt-20 pb-12"} flex-grow flex flex-col items-center`}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{ marginTop: isFullScreen ? 0 : "4rem" }} // Keeps content below navbar
+      >
         <div className="flex justify-center">
           <Document
             file={`/${file}`}
-            onLoadSuccess={onDocumentLoadSuccess}
+            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
             className="flex justify-center gap-1 lg:gap-2"
           >
-            <div className="flex flex-col items-center">
+            {/* First Page */}
+            <Page
+              pageNumber={currentPage}
+              className="shadow-lg bg-white rounded-lg"
+              width={isMobile ? window.innerWidth - 20 : 600}
+              height={isMobile && isFullScreen ? window.innerHeight - 50 : undefined}
+            />
+
+            {/* Second Page (Only in Two-Page View Mode) */}
+            {showTwoPages && currentPage + 1 <= (numPages || 0) && (
               <Page
-                pageNumber={currentPage}
+                pageNumber={currentPage + 1}
                 className="shadow-lg bg-white rounded-lg"
-                width={isMobile ? window.innerWidth - 40 : 600} // Full width on mobile, 600px on desktop
+                width={isMobile ? window.innerWidth - 20 : 600}
+                height={isMobile && isFullScreen ? window.innerHeight - 50 : undefined}
               />
-            </div>
-            {showTwoPages && currentPage + 1 <= (numPages || 0) && !isMobile && (
-              <div className="flex flex-col items-center">
-                <Page
-                  pageNumber={currentPage + 1}
-                  className="shadow-lg bg-white rounded-lg"
-                  width={600} // Second page only on desktop
-                />
-              </div>
             )}
           </Document>
         </div>
