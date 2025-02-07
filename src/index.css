@@ -29,7 +29,7 @@
   }
 }
 
-/* 🔥 Background Gradient */
+/*  Background Gradient */
 body {
   background: linear-gradient(180deg, #09001a 0%, #1b0063 50%, #4c0076 100%);
   background-size: cover;
@@ -38,7 +38,7 @@ body {
   overflow-x: hidden;
 }
 
-/* 🔥 Animated Grid Overlay */
+/*  Animated Grid Overlay */
 body::before {
   content: "";
   position: absolute;
@@ -61,7 +61,7 @@ body::before {
   }
 }
 
-/* 🎨 Button Styling */
+/* Button Styling */
 button {
   background: linear-gradient(135deg, #ff1493, #8a2be2);
   border: none;
@@ -79,13 +79,13 @@ button:hover {
   transform: scale(1.07);
 }
 
-/* 🔥 Text Shadows for Headers */
+/*  Text Shadows for Headers */
 h1, h2, h3 {
   text-shadow: 0 0 12px rgba(255, 0, 128, 0.8), 0 0 24px rgba(138, 43, 226, 0.6);
   font-weight: bold;
 }
 
-/* 🟣 Glassmorphic Cards */
+/* Glassmorphic Cards */
 .card {
   background: rgba(36, 0, 70, 0.55);
   backdrop-filter: blur(10px);
@@ -100,7 +100,7 @@ h1, h2, h3 {
   transform: scale(1.05);
 }
 
-/* ✨ Links with Glow Effect */
+/* Links with Glow Effect */
 a {
   color: var(--muted);
   text-decoration: none;
@@ -112,7 +112,7 @@ a:hover {
   text-shadow: 0 0 10px var(--muted), 0 0 20px var(--accent);
 }
 
-/* 🔥 Footer Blending with Body */
+/*  Footer  */
 .footer {
   background: linear-gradient(90deg, #7209b7, #ff006e);
   color: white;
@@ -136,7 +136,7 @@ a:hover {
   left: 0;
 }
 
-/* 📄 PDF Page Styling */
+/* PDF Page Styling */
 .react-pdf__Page {
   display: flex;
   justify-content: center;

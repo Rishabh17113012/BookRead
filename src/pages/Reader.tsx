@@ -1,27 +1,26 @@
-import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Home } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
-import { motion, AnimatePresence } from "framer-motion";
-
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 const Reader = () => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [scale, setScale] = useState(1.0);
-  const [selectedText, setSelectedText] = useState("");
-  const documentRef = useRef<HTMLDivElement>(null);
   const [showTwoPages, setShowTwoPages] = useState(window.innerWidth >= 1024);
+  
+  // Get selected PDF from URL
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const file = queryParams.get("file");
 
   useEffect(() => {
     const handleResize = () => {
       setShowTwoPages(window.innerWidth >= 1024);
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -29,7 +28,9 @@ const Reader = () => {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" && currentPage < (numPages || 0)) {
-        setCurrentPage((prev) => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0));
+        setCurrentPage((prev) =>
+          Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0)
+        );
       } else if (e.key === "ArrowLeft" && currentPage > 1) {
         setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1));
       }
@@ -43,103 +44,78 @@ const Reader = () => {
     setNumPages(numPages);
   };
 
-  const handleTextSelection = () => {
-    const selection = window.getSelection();
-    if (selection) {
-      const text = selection.toString();
-      if (text) {
-        setSelectedText(text);
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
-      <nav className="fixed top-0 w-full bg-gradient-to-b from-[#09001a]/90 to-[#240046]/80 backdrop-blur-lg border-b border-[#7209b7]/50 shadow-lg z-50">
-  <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-    <Link to="/">
-      <Button
-        variant="ghost"
-        className="flex items-center gap-2 text-[#dad8f7] hover:text-white transition-colors"
-      >
-        <Home size={20} />
-        <span>Home</span>
-      </Button>
-    </Link>
-    <div className="flex items-center gap-4">
-      <span className="text-sm text-gray-400">
-        Page {currentPage} of {numPages}
-      </span>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          className="border-[#f72585] text-[#f72585] hover:border-[#ff006e] hover:text-[#ff006e]"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1))}
-          disabled={currentPage <= 1}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="border-[#4cc9f0] text-[#4cc9f0] hover:border-[#4361ee] hover:text-[#4361ee]"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0))}
-          disabled={currentPage >= (numPages || 0)}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  </div>
-</nav>
+      {/* Navbar */}
+      <nav className="fixed top-0 w-full bg-gradient-to-b from-[#09001a]/90 to-[#240046]/80 backdrop-blur-lg border-b border-[#7209b7]/50 shadow-lg z-50 flex justify-between items-center px-4 h-16">
+        {/* Home Button */}
+        <Link to="/">
+          <Button variant="ghost" className="text-[#dad8f7] hover:text-white">
+            <Home size={20} />
+            <span>Home</span>
+          </Button>
+        </Link>
 
+        {/* Navigation Controls (Centered) */}
+        <div className="flex gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            className="border-[#f72585] text-[#f72585] hover:border-[#ff006e] hover:text-[#ff006e]"
+            onClick={() =>
+              setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1))
+            }
+            disabled={currentPage <= 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="border-[#4cc9f0] text-[#4cc9f0] hover:border-[#4361ee] hover:text-[#4361ee]"
+            onClick={() =>
+              setCurrentPage((prev) =>
+                Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0)
+              )
+            }
+            disabled={currentPage >= (numPages || 0)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
 
-      <main className="container mx-auto px-4 pt-24 pb-12 flex-grow flex flex-col items-center">
+        {/* Page Number on the Right */}
+        <span className="text-sm text-gray-300">
+          Page {currentPage} of {numPages}
+        </span>
+      </nav>
 
-        <motion.div
-          ref={documentRef}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-center"
-          onMouseUp={handleTextSelection}
-        >
-          <Document file="/sample.pdf" onLoadSuccess={onDocumentLoadSuccess} className="flex gap-4 justify-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentPage}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="flex gap-4"
-              >
+      {/* PDF Viewer */}
+      <main className="container mx-auto px-4 pt-20 pb-12 flex-grow flex flex-col items-center">
+        <div className="flex justify-center">
+          <Document
+            file={`/${file}`}
+            onLoadSuccess={onDocumentLoadSuccess}
+            className="flex justify-center gap-1 lg:gap-1" // Reduced space between pages
+          >
+            <div className="flex flex-col items-center">
+              <Page
+                pageNumber={currentPage}
+                className="shadow-lg bg-white"
+                width={window.innerWidth > 1024 ? 600 : undefined} // Increased width
+              />
+            </div>
+            {showTwoPages && currentPage + 1 <= (numPages || 0) && (
+              <div className="flex flex-col items-center">
                 <Page
-                  pageNumber={currentPage}
-                  scale={scale}
-                  className="shadow-lg rounded-lg overflow-hidden bg-white"
-                  renderTextLayer={true}
+                  pageNumber={currentPage + 1}
+                  className="shadow-lg bg-white"
+                  width={window.innerWidth > 1024 ? 600 : undefined} // Increased width
                 />
-                {showTwoPages && currentPage + 1 <= (numPages || 0) && (
-                  <Page
-                    pageNumber={currentPage + 1}
-                    scale={scale}
-                    className="shadow-lg rounded-lg overflow-hidden bg-white"
-                    renderTextLayer={true}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+              </div>
+            )}
           </Document>
-        </motion.div>
-
-        {selectedText && (
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-lg shadow-lg border">
-            <p className="text-sm font-medium">Selected text:</p>
-            <p className="text-gray-600">{selectedText}</p>
-          </div>
-        )}
+        </div>
       </main>
     </div>
   );
