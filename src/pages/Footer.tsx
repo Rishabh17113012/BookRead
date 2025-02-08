@@ -49,6 +49,9 @@ const Footer: React.FC = () => {
 
         {/* Client Section (Right for Desktop, Below for Mobile) */}
         <div className="mt-4 md:mt-0 md:w-2/3 text-center">
+        <p className="text-base md:text-lg font-semibold text-[#f8f9fa] drop-shadow-lg">
+            Bharati Vidyapeeth College of Engineering
+          </p>
           <p className="text-base md:text-lg font-semibold text-[#f8f9fa] drop-shadow-lg">
             Thank you for visiting!
           </p>
