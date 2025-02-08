@@ -14,6 +14,7 @@ const Reader = () => {
   const [showTwoPages, setShowTwoPages] = useState(window.innerWidth >= 1024);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [showSwipeAlert, setShowSwipeAlert] = useState(isMobile); // Show alert initially for mobile users
 
   // Get selected PDF from URL
   const location = useLocation();
@@ -70,12 +71,6 @@ const Reader = () => {
     });
   };
 
-  // Go to Bookmarked Page with Smooth Scroll
-  const goToPage = (page: number) => {
-    setCurrentPage(page);
-    document.getElementById("pdf-container")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   // Handle Touch Start (Swipe Detection)
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartX(e.touches[0].clientX);
@@ -100,6 +95,16 @@ const Reader = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] overflow-hidden">
+      {/* Swipe Alert for Mobile Users */}
+      {isMobile && showSwipeAlert && (
+        <div
+          className="fixed top-10 left-1/2 transform -translate-x-1/2 bg-black text-white text-sm px-4 py-2 rounded-lg shadow-md z-50 cursor-pointer"
+          onClick={() => setShowSwipeAlert(false)}
+        >
+          Swipe left or right to turn pages!
+        </div>
+      )}
+
       {/* Navbar */}
       <nav className="fixed top-0 w-full bg-[#09001a] text-white py-2 px-4 flex items-center justify-between shadow-md z-50">
         {/* Home Button */}
