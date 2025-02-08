@@ -93,12 +93,20 @@ const Reader = () => {
     setTouchStartX(null);
   };
 
+  // Automatically remove the alert after 5 seconds
+  useEffect(() => {
+    if (showSwipeAlert) {
+      const timer = setTimeout(() => setShowSwipeAlert(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSwipeAlert]);
+
   return (
     <div className="min-h-screen bg-[#F8F9FA] overflow-hidden">
-      {/* Swipe Alert for Mobile Users */}
+      {/* Swipe Alert for Mobile Users (Positioned Above Navbar) */}
       {isMobile && showSwipeAlert && (
         <div
-          className="fixed top-10 left-1/2 transform -translate-x-1/2 bg-black text-white text-sm px-4 py-2 rounded-lg shadow-md z-50 cursor-pointer"
+          className="fixed top-0 left-0 w-full bg-black text-white text-sm px-4 py-2 text-center shadow-md z-50 cursor-pointer"
           onClick={() => setShowSwipeAlert(false)}
         >
           Swipe left or right to turn pages!
@@ -106,7 +114,7 @@ const Reader = () => {
       )}
 
       {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-[#09001a] text-white py-2 px-4 flex items-center justify-between shadow-md z-50">
+      <nav className="fixed top-0 w-full bg-[#09001a] text-white py-2 px-4 flex items-center justify-between shadow-md z-40">
         {/* Home Button */}
         <Link to="/">
           <Button variant="ghost" className="text-white hover:text-gray-300">
