@@ -1,9 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Home, Bookmark, BookmarkCheck } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
+import Navbar from "./Navbar";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
@@ -104,20 +103,18 @@ const Reader = () => {
     if (file) localStorage.setItem(`pdf_progress_${file}`, currentPage.toString());
   }, [currentPage, file]);
 
-  // Fixed keyboard controls
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Prevent handling if any input elements are focused
       if (document.activeElement?.tagName === 'INPUT' || 
           document.activeElement?.tagName === 'TEXTAREA') {
         return;
       }
 
       if (e.key === "ArrowRight" && currentPage < (numPages || 0)) {
-        e.preventDefault(); // Prevent default scroll
+        e.preventDefault();
         changePage('next');
       } else if (e.key === "ArrowLeft" && currentPage > 1) {
-        e.preventDefault(); // Prevent default scroll
+        e.preventDefault();
         changePage('prev');
       }
     };
@@ -166,44 +163,14 @@ const Reader = () => {
         </div>
       )}
 
-      <nav className="fixed top-0 w-full bg-[#09001a] text-white py-2 px-4 flex items-center justify-between shadow-md z-40">
-        <Link to="/">
-          <Button variant="ghost" className="text-white hover:text-gray-300">
-            <Home size={20} />
-          </Button>
-        </Link>
-
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            className="border-gray-300 text-gray-300 hover:border-white hover:text-white"
-            onClick={() => changePage('prev')}
-            disabled={currentPage <= 1 || isFlipping}
-          >
-            <ChevronLeft size={20} />
-          </Button>
-          <span className="text-sm text-gray-300">
-            Page {currentPage} of {numPages}
-          </span>
-          <Button
-            variant="outline"
-            className="border-gray-300 text-gray-300 hover:border-white hover:text-white"
-            onClick={() => changePage('next')}
-            disabled={currentPage >= (numPages || 0) || isFlipping}
-          >
-            <ChevronRight size={20} />
-          </Button>
-        </div>
-
-        <Button
-          onClick={toggleBookmark}
-          variant="ghost"
-          className="text-white hover:text-yellow-400"
-          disabled={isFlipping}
-        >
-          {bookmarks.includes(currentPage) ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
-        </Button>
-      </nav>
+      <Navbar
+        currentPage={currentPage}
+        numPages={numPages}
+        isFlipping={isFlipping}
+        bookmarks={bookmarks}
+        onPageChange={changePage}
+        onToggleBookmark={toggleBookmark}
+      />
 
       <main
         id="pdf-container"
