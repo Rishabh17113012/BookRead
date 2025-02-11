@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Home, Bookmark, BookmarkCheck } from "lucide-react";
@@ -14,14 +14,84 @@ const Reader = () => {
   const [showTwoPages, setShowTwoPages] = useState(window.innerWidth >= 1024);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [showSwipeAlert, setShowSwipeAlert] = useState(isMobile); // Show alert initially for mobile users
+  const [showSwipeAlert, setShowSwipeAlert] = useState(isMobile);
+  const [pageDimensions, setPageDimensions] = useState({ width: 0, height: 0 });
+  const [isFlipping, setIsFlipping] = useState(false);
+  const [flipDirection, setFlipDirection] = useState<'next' | 'prev' | null>(null);
 
-  // Get selected PDF from URL
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const file = queryParams.get("file");
 
-  // Load Saved Progress & Bookmarks
+  const calculatePageDimensions = useCallback(() => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const navbarHeight = 64;
+    const padding = 32;
+    const availableHeight = screenHeight - navbarHeight - padding;
+    const standardPDFRatio = 1.414;
+
+    if (screenWidth < 768) {
+      const maxWidth = screenWidth - padding * 2;
+      const calculatedHeight = maxWidth * standardPDFRatio * 1.4;
+      
+      setPageDimensions({
+        width: maxWidth,
+        height: calculatedHeight
+      });
+    } else {
+      const maxWidth = showTwoPages 
+        ? (screenWidth - padding * 3) / 2
+        : screenWidth - padding * 2;
+      const maxHeight = availableHeight;
+
+      if (maxWidth / standardPDFRatio > maxHeight) {
+        setPageDimensions({
+          height: maxHeight,
+          width: maxHeight * (1 / standardPDFRatio)
+        });
+      } else {
+        setPageDimensions({
+          width: maxWidth,
+          height: maxWidth * standardPDFRatio
+        });
+      }
+    }
+  }, [showTwoPages]);
+
+  const changePage = useCallback((direction: 'next' | 'prev') => {
+    if (isFlipping) return;
+    
+    setFlipDirection(direction);
+    setIsFlipping(true);
+    
+    setTimeout(() => {
+      if (direction === 'next' && currentPage < (numPages || 0)) {
+        setCurrentPage(prev => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0));
+      } else if (direction === 'prev' && currentPage > 1) {
+        setCurrentPage(prev => Math.max(prev - (showTwoPages ? 2 : 1), 1));
+      }
+      
+      setTimeout(() => {
+        setIsFlipping(false);
+        setFlipDirection(null);
+      }, 400);
+    }, 200);
+  }, [isFlipping, currentPage, numPages, showTwoPages]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setShowTwoPages(width >= 1024);
+      setIsMobile(width < 768);
+      calculatePageDimensions();
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [calculatePageDimensions]);
+
   useEffect(() => {
     const savedPage = localStorage.getItem(`pdf_progress_${file}`);
     if (savedPage) setCurrentPage(parseInt(savedPage, 10));
@@ -30,36 +100,50 @@ const Reader = () => {
     if (savedBookmarks) setBookmarks(JSON.parse(savedBookmarks));
   }, [file]);
 
-  // Save Progress when Page Changes
   useEffect(() => {
     if (file) localStorage.setItem(`pdf_progress_${file}`, currentPage.toString());
   }, [currentPage, file]);
 
-  // Handle Window Resize
-  useEffect(() => {
-    const handleResize = () => {
-      setShowTwoPages(window.innerWidth >= 1024);
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Handle Keyboard Navigation
+  // Fixed keyboard controls
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
+      // Prevent handling if any input elements are focused
+      if (document.activeElement?.tagName === 'INPUT' || 
+          document.activeElement?.tagName === 'TEXTAREA') {
+        return;
+      }
+
       if (e.key === "ArrowRight" && currentPage < (numPages || 0)) {
-        setCurrentPage((prev) => Math.min(prev + (showTwoPages ? 2 : 1), numPages || 0));
+        e.preventDefault(); // Prevent default scroll
+        changePage('next');
       } else if (e.key === "ArrowLeft" && currentPage > 1) {
-        setCurrentPage((prev) => Math.max(prev - (showTwoPages ? 2 : 1), 1));
+        e.preventDefault(); // Prevent default scroll
+        changePage('prev');
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentPage, numPages, showTwoPages]);
+  }, [changePage, currentPage, numPages]);
 
-  // Handle Bookmark Toggle
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartX) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchDiff = touchStartX - touchEndX;
+
+    if (touchDiff > 50 && currentPage < (numPages || 0)) {
+      changePage('next');
+    } else if (touchDiff < -50 && currentPage > 1) {
+      changePage('prev');
+    }
+
+    setTouchStartX(null);
+  };
+
   const toggleBookmark = () => {
     setBookmarks((prev) => {
       const updatedBookmarks = prev.includes(currentPage)
@@ -71,39 +155,8 @@ const Reader = () => {
     });
   };
 
-  // Handle Touch Start (Swipe Detection)
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
-  };
-
-  // Handle Touch End (Detect Swipe Direction)
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStartX) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchDiff = touchStartX - touchEndX;
-
-    if (touchDiff > 50 && currentPage < (numPages || 0)) {
-      // Swipe Left (Next Page)
-      setCurrentPage((prev) => Math.min(prev + 1, numPages || 0));
-    } else if (touchDiff < -50 && currentPage > 1) {
-      // Swipe Right (Previous Page)
-      setCurrentPage((prev) => Math.max(prev - 1, 1));
-    }
-
-    setTouchStartX(null);
-  };
-
-  // Automatically remove the alert after 5 seconds
-  useEffect(() => {
-    if (showSwipeAlert) {
-      const timer = setTimeout(() => setShowSwipeAlert(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showSwipeAlert]);
-
   return (
     <div className="min-h-screen bg-[#F8F9FA] overflow-hidden">
-      {/* Swipe Alert for Mobile Users (Positioned Above Navbar) */}
       {isMobile && showSwipeAlert && (
         <div
           className="fixed top-0 left-0 w-full bg-black text-white text-sm px-4 py-2 text-center shadow-md z-50 cursor-pointer"
@@ -113,22 +166,19 @@ const Reader = () => {
         </div>
       )}
 
-      {/* Navbar */}
       <nav className="fixed top-0 w-full bg-[#09001a] text-white py-2 px-4 flex items-center justify-between shadow-md z-40">
-        {/* Home Button */}
         <Link to="/">
           <Button variant="ghost" className="text-white hover:text-gray-300">
             <Home size={20} />
           </Button>
         </Link>
 
-        {/* Navigation & Page Number */}
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
             className="border-gray-300 text-gray-300 hover:border-white hover:text-white"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage <= 1}
+            onClick={() => changePage('prev')}
+            disabled={currentPage <= 1 || isFlipping}
           >
             <ChevronLeft size={20} />
           </Button>
@@ -138,54 +188,203 @@ const Reader = () => {
           <Button
             variant="outline"
             className="border-gray-300 text-gray-300 hover:border-white hover:text-white"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, numPages || 0))}
-            disabled={currentPage >= (numPages || 0)}
+            onClick={() => changePage('next')}
+            disabled={currentPage >= (numPages || 0) || isFlipping}
           >
             <ChevronRight size={20} />
           </Button>
         </div>
 
-        {/* Bookmark Button */}
         <Button
           onClick={toggleBookmark}
           variant="ghost"
           className="text-white hover:text-yellow-400"
+          disabled={isFlipping}
         >
           {bookmarks.includes(currentPage) ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
         </Button>
       </nav>
 
-      {/* PDF Viewer */}
       <main
         id="pdf-container"
-        className="container mx-auto px-4 pt-20 pb-12 flex-grow flex flex-col items-center"
+        className="container mx-auto px-4 pt-20 pb-12 flex-grow flex flex-col items-center justify-center perspective"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="flex justify-center">
+        <div 
+          className={`flex justify-center ${showTwoPages ? 'items-start book-shadow' : ''} 
+            ${isFlipping ? 'flipping' : ''} 
+            ${flipDirection === 'next' ? 'flip-next' : ''} 
+            ${flipDirection === 'prev' ? 'flip-prev' : ''}`}
+        >
           <Document
             file={`/${file}`}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-            className="flex justify-center gap-1 lg:gap-2"
+            className={`flex justify-center ${showTwoPages ? 'book-spread' : ''}`}
+            loading={
+              <div className="flex items-center justify-center w-full h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            }
           >
-            {/* First Page */}
             <Page
               pageNumber={currentPage}
-              className="shadow-lg bg-white rounded-lg"
-              width={isMobile ? window.innerWidth - 20 : 600}
+              className={`bg-white ${
+                showTwoPages 
+                  ? 'rounded-l-lg rounded-r-none border-r border-gray-300' 
+                  : 'rounded-lg shadow-lg'
+              }`}
+              width={pageDimensions.width}
+              height={pageDimensions.height}
+              loading={
+                <div className="flex items-center justify-center w-full h-64">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+              }
             />
 
-            {/* Second Page (Only in Two-Page View Mode) */}
             {showTwoPages && currentPage + 1 <= (numPages || 0) && (
               <Page
                 pageNumber={currentPage + 1}
-                className="shadow-lg bg-white rounded-lg"
-                width={isMobile ? window.innerWidth - 20 : 600}
+                className="bg-white rounded-r-lg rounded-l-none"
+                width={pageDimensions.width}
+                height={pageDimensions.height}
+                loading={
+                  <div className="flex items-center justify-center w-full h-64">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                }
               />
             )}
           </Document>
         </div>
       </main>
+
+      <style>{`
+        .perspective {
+          perspective: 2000px;
+          perspective-origin: 50% 50%;
+        }
+
+        .book-spread {
+          display: flex;
+          background: white;
+          border-radius: 8px;
+          transform-style: preserve-3d;
+          transition: all 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+          position: relative;
+          transform-origin: center left;
+        }
+
+        .book-spread .react-pdf__Page {
+          margin: 0 !important;
+          backface-visibility: hidden;
+        }
+
+        .book-spread::after {
+          content: '';
+          position: absolute;
+          left: 50%;
+          top: 0;
+          bottom: 0;
+          width: 2px;
+          background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.05));
+          transform: translateX(-50%);
+        }
+
+        .flipping {
+          transition: transform 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .flip-next {
+          animation: flipNextRealistic 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .flip-prev {
+          animation: flipPrevRealistic 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        @keyframes flipNextRealistic {
+          0% {
+            transform: rotateY(0) translateZ(0);
+            box-shadow: -5px 5px 5px rgba(0,0,0,0.1);
+          }
+          50% {
+            transform: rotateY(-35deg) translateZ(50px);
+            box-shadow: -20px 10px 15px rgba(0,0,0,0.15);
+          }
+          100% {
+            transform: rotateY(0) translateZ(0);
+            box-shadow: -5px 5px 5px rgba(0,0,0,0.1);
+          }
+        }
+
+        @keyframes flipPrevRealistic {
+          0% {
+            transform: rotateY(0) translateZ(0);
+            box-shadow: 5px 5px 5px rgba(0,0,0,0.1);
+          }
+          50% {
+            transform: rotateY(35deg) translateZ(50px);
+            box-shadow: 20px 10px 15px rgba(0,0,0,0.15);
+          }
+          100% {
+            transform: rotateY(0) translateZ(0);
+            box-shadow: 5px 5px 5px rgba(0,0,0,0.1);
+          }
+        }
+
+        .book-shadow {
+          position: relative;
+        }
+
+        .book-shadow::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: -20px;
+          height: 20px;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.12), transparent);
+          filter: blur(8px);
+          transform-origin: center;
+          transform: perspective(100px) rotateX(40deg);
+          opacity: 0.8;
+        }
+
+        .book-spread::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 3px;
+          left: -3px;
+          background: linear-gradient(to right,
+            rgba(0,0,0,0.05),
+            rgba(0,0,0,0.02) 50%,
+            rgba(255,255,255,0.05) 100%
+          );
+          border-radius: 2px 0 0 2px;
+          transform: translateZ(-1px);
+        }
+
+        .book-spread:hover {
+          transform: translateZ(5px);
+          box-shadow: 
+            -5px 5px 10px rgba(0,0,0,0.1),
+            -1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+          .flip-next, .flip-prev {
+            animation-duration: 0.35s;
+          }
+          
+          .perspective {
+            perspective: 1500px;
+          }
+        }
+      `}</style>
     </div>
   );
 };
