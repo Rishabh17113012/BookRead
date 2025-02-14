@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+  <defs>
+    <linearGradient id="mountainGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2b0047"/>
+      <stop offset="100%" style="stop-color:#5b0077"/>
+    </linearGradient>
+    <linearGradient id="mountainGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0033"/>
+      <stop offset="100%" style="stop-color:#3b0057"/>
+    </linearGradient>
+    <linearGradient id="mountainGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a001a"/>
+      <stop offset="100%" style="stop-color:#1b0037"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Mountains -->
+  <path d="M0 320L720 100L1440 320" fill="url(#mountainGrad3)" opacity="0.8"/>
+  <path d="M0 320L480 150L960 320" fill="url(#mountainGrad2)" opacity="0.9"/>
+  <path d="M480 320L960 180L1440 320" fill="url(#mountainGrad1)"/>
+</svg>

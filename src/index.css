@@ -1,20 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: #09001a;
-    --foreground: #f8f9fa;
-    --card: rgba(36, 0, 70, 0.75);
-    --card-foreground: #ff0080;
-    --primary: #8a2be2;
-    --primary-foreground: #f8f9fa;
-    --secondary: #3a0ca3;
-    --secondary-foreground: #f8f9fa;
-    --accent: #ff00ff;
+    --background: #0a001f;
+    --foreground: #ffffff;
+    --card: rgba(41, 7, 89, 0.75);
+    --card-foreground: #ff2d87;
+    --primary: #7b2ff7;
+    --primary-foreground: #ffffff;
+    --secondary: #4009c8;
+    --secondary-foreground: #ffffff;
+    --accent: #ff36ee;
     --muted: #4cc9f0;
-    --border: #ff1493;
+    --border: #ff2d87;
     --radius: 0.75rem;
   }
 }
@@ -25,115 +27,143 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
   }
 }
 
-/*  Background Gradient */
-body {
-  background: linear-gradient(180deg, #09001a 0%, #1b0063 50%, #4c0076 100%);
-  background-size: cover;
-  background-attachment: fixed;
-  position: relative;
-  overflow-x: hidden;
+/* Synthwave Background with Neon Radial Gradient */
+.synthwave-bg {
+  background: radial-gradient(circle at 50% 50%, #0a001f, #1a0045, #310088, #5100a3, #7000bd);
+  position: fixed;
+  inset: 0;
+  z-index: -3;
 }
 
-/*  Animated Grid Overlay */
-body::before {
-  content: "";
+/* Clear, Neon Grid Overlay */
+.perspective-grid {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(0deg, transparent 24%, rgba(123, 47, 247, 0.4) 25%, rgba(123, 47, 247, 0.4) 26%, transparent 27%, transparent 74%, rgba(123, 47, 247, 0.4) 75%, rgba(123, 47, 247, 0.4) 76%, transparent 77%, transparent),
+    linear-gradient(90deg, transparent 24%, rgba(123, 47, 247, 0.4) 25%, rgba(123, 47, 247, 0.4) 26%, transparent 27%, transparent 74%, rgba(123, 47, 247, 0.4) 75%, rgba(123, 47, 247, 0.4) 76%, transparent 77%, transparent);
+  background-size: 50px 50px;
+  transform: perspective(1000px) rotateX(60deg) scale(2.5);
+  transform-origin: center center;
+  animation: gridPulse 8s ease-in-out infinite;
+  z-index: -2;
+}
+
+@keyframes gridPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: perspective(1000px) rotateX(60deg) scale(2.5);
+  }
+  50% {
+    opacity: 0.7;
+    transform: perspective(1000px) rotateX(60deg) scale(2.7);
+  }
+}
+
+/* Neon Heading with Subtle Glow */
+.heading-primary {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--foreground);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.6), 0 0 10px rgba(255, 45, 135, 0.3);
+  letter-spacing: -0.02em;
+  position: relative;
+  transform: perspective(800px) translateZ(0);
+  transition: transform 0.5s ease;
+}
+
+.heading-primary:hover {
+  transform: perspective(800px) translateZ(30px);
+}
+
+.heading-primary::after {
+  content: attr(data-text);
   position: absolute;
+  left: 0;
+  top: 0;
   width: 100%;
   height: 100%;
-  background: url('/synthwave-grid.png');
-  background-size: 600px 600px; /* Adjust grid size */
-  background-repeat: repeat;
-  opacity: 0.25; /* Adjust transparency */
-  z-index: -1;
-  animation: moveGrid 20s infinite linear;
+  background: linear-gradient(135deg, #ffffff 0%, #ff2d87 50%, #7b2ff7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 0.8;
 }
 
-@keyframes moveGrid {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 100px 100px; /* Moves the grid diagonally */
-  }
+/* Supporting Text with Subtle Neon Glow */
+.text-glow {
+  color: var(--foreground);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px rgba(255, 45, 135, 0.3);
+  font-weight: 500;
 }
 
-/* Button Styling */
-button {
-  background: linear-gradient(135deg, #ff1493, #8a2be2);
-  border: none;
-  color: white;
-  padding: 14px 24px;
-  border-radius: 6px;
-  font-size: 16px;
-  text-transform: uppercase;
-  box-shadow: 0 0 12px rgba(255, 20, 147, 0.8);
-  transition: 0.3s ease-in-out;
-}
-
-button:hover {
-  box-shadow: 0 0 20px rgba(255, 20, 147, 1), 0 0 30px #8a2be2;
-  transform: scale(1.07);
-}
-
-/*  Text Shadows for Headers */
-h1, h2, h3 {
-  text-shadow: 0 0 12px rgba(255, 0, 128, 0.8), 0 0 24px rgba(138, 43, 226, 0.6);
-  font-weight: bold;
-}
-
-/* Glassmorphic Cards */
-.card {
-  background: rgba(36, 0, 70, 0.55);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 15px rgba(255, 20, 147, 0.4);
-  border-radius: 12px;
-  padding: 20px;
-  transition: 0.3s ease-in-out;
-}
-
-.card:hover {
-  box-shadow: 0 0 25px rgba(255, 0, 128, 0.7);
-  transform: scale(1.05);
-}
-
-/* Links with Glow Effect */
-a {
-  color: var(--muted);
-  text-decoration: none;
-  transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
-}
-
-a:hover {
-  color: var(--accent);
-  text-shadow: 0 0 10px var(--muted), 0 0 20px var(--accent);
-}
-
-/*  Footer  */
-.footer {
-  background: linear-gradient(90deg, #7209b7, #ff006e);
-  color: white;
-  text-align: center;
-  padding: 20px 0;
-  font-size: 14px;
-  box-shadow: 0 0 20px rgba(255, 20, 147, 0.7);
-  backdrop-filter: blur(12px);
-  width: 100%;
-  z-index: 50;
+/* Neon Button with 3D Hover Effects */
+.cybr-btn {
+  background: linear-gradient(45deg, #ff2d87, #7b2ff7);
+  color: var(--foreground);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  padding: 0.75rem 1.75rem;
+  border-radius: 8px;
   position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(123, 47, 247, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-.footer::after {
-  content: "";
+.cybr-btn::before {
+  content: '';
   position: absolute;
+  top: 0;
+  left: -100%;
   width: 100%;
-  height: 15px;
-  background: linear-gradient(to top, rgba(255, 0, 128, 0.4), transparent);
-  bottom: -10px;
-  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: 0.5s;
+}
+
+.cybr-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 45, 135, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.cybr-btn:hover::before {
+  left: 100%;
+}
+
+/* Synthwave Card with Glassmorphism & Neon Border */
+.synthwave-card {
+  background: rgba(41, 7, 89, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 45, 135, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 30px rgba(123, 47, 247, 0.1), inset 0 0 20px rgba(255, 45, 135, 0.1);
+}
+
+.synthwave-card:hover {
+  transform: translateY(-5px) perspective(800px) rotateX(3deg);
+  border-color: rgba(255, 45, 135, 0.4);
+  box-shadow: 0 15px 35px rgba(255, 45, 135, 0.2), 0 0 30px rgba(123, 47, 247, 0.3), inset 0 0 20px rgba(255, 45, 135, 0.2);
+}
+
+/* Navigation Link Styling */
+.nav-link {
+  font-weight: 600;
+  color: var(--foreground);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 45, 135, 0.5);
 }
 
 /* PDF Page Styling */
@@ -149,4 +179,86 @@ a:hover {
   height: auto !important;
   box-shadow: 0 0 20px #4cc9f0;
   border-radius: var(--radius);
+}
+
+/* Additional Terrain Grid Effect for Depth */
+.terrain-grid {
+  background: linear-gradient(to bottom, transparent 0%, rgba(255, 42, 109, 0.2) 35%, rgba(255, 42, 109, 0.6) 100%),
+              linear-gradient(90deg, transparent 0%, rgba(255, 42, 109, 0.2) 35%, rgba(255, 42, 109, 0.6) 100%);
+  background-size: 60px 60px;
+  transform: perspective(1000px) rotateX(60deg);
+  transform-origin: bottom;
+  animation: gridMove 20s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes gridMove {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 60px 60px;
+  }
+}
+
+/* Star Animation for Subtle Twinkling */
+@keyframes twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.animate-twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+/* Enhanced Button Neon Hover Effects */
+.bg-[#ff006e]:hover {
+  animation: neonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px theme('colors.pink.500/50');
+  }
+  50% {
+    box-shadow: 0 0 25px theme('colors.pink.500/70');
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #12002b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #ff006e, #7209b7);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #ff006e, #3a0ca3);
+}
+
+/* Responsive Enhancements */
+@media (max-width: 768px) {
+  .heading-primary {
+    font-size: 2.5rem;
+  }
+  .cybr-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  .synthwave-card {
+    padding: 1rem;
+  }
+  .nav-link {
+    font-size: 1rem;
+  }
+  .text-glow {
+    font-size: 0.9rem;
+  }
 }
