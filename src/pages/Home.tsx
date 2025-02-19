@@ -221,11 +221,15 @@ const Home = () => {
               initial={{ opacity: 1 }}
               exit={{ opacity: 0, transition: { duration: 0.5 } }}
             >
-              <motion.div layoutId="logo" className="max-w-[80%] mx-auto">
+              {/* Use a flex container so the image can center and scale naturally */}
+              <motion.div
+                layoutId="logo"
+                className="flex items-center justify-center mx-auto max-w-[80%] max-h-[80vh]"
+              >
                 <img
                   src="/Genre_Logo.png"
                   alt="Genre Magazine Logo"
-                  className="w-full object-contain"
+                  className="max-w-full max-h-full object-contain"
                 />
               </motion.div>
             </motion.div>
