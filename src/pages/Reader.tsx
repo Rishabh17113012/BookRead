@@ -52,8 +52,9 @@ const Reader = () => {
       let width: number, height: number;
 
       if (screenWidth < 768) {
+
         width = screenWidth - padding * 2;
-        height = width * standardPDFRatio * 1.4;
+        height = width * standardPDFRatio * 2.5;
       } else {
         width = showTwoPages
           ? (screenWidth - padding * 3) / 2
