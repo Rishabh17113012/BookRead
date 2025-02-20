@@ -274,3 +274,6 @@
     transform: translate3d(0,0,10px) scale(1.1); 
   }
 }
+html {
+  scroll-behavior: smooth;
+}

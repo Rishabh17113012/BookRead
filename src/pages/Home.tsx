@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import Footer from "@/pages/Footer";
+import Navbar from "@/pages/NavbarHome"; 
 import { quotes } from "./quotes";
 
 const Home = () => {
@@ -57,7 +58,7 @@ const Home = () => {
     },
   };
 
-  // Quote Display Component with 3D effect and internal glitch overlay
+  // Quote Display Component
   const EnhancedQuoteDisplay = ({ quote }: { quote: string }) => {
     return (
       <div className="relative max-w-3xl mx-auto mb-8">
@@ -117,7 +118,7 @@ const Home = () => {
             </rect>
           </svg>
 
-          {/* 3D-styled quote */}
+          {/* 3D quote */}
           <div className="relative p-6 transform-gpu perspective-800">
             <AnimatePresence mode="wait">
               <motion.p
@@ -149,26 +150,16 @@ const Home = () => {
         <div className="perspective-grid" />
         <div className="sparkles-overlay absolute inset-0 pointer-events-none z-[-2]" />
 
-        <motion.nav
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          transition={{ type: "spring", stiffness: 50, damping: 15 }}
-          className="fixed top-0 w-full bg-card/90 backdrop-blur-lg border-b border-primary/30 z-50"
-        >
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <Link to="/" className="nav-link text-2xl font-bold">
-              Genre Magazine 2025
-            </Link>
-          </div>
-        </motion.nav>
+        {/* Navbar */}
+        <Navbar />
 
         {/* Main content area */}
-        {/* This container has a higher z-index so it's above the skyline. */}
         <div className="relative z-10 container mx-auto px-4 pt-24 pb-16">
           <div className="glitch-overlay absolute inset-0 pointer-events-none z-[-1]" />
 
           <div className="text-center mb-16">
             <motion.div
+              id="art-of-reading"
               layoutId="logo"
               transition={{ type: "spring", stiffness: 120, damping: 20 }}
               className="px-4 py-2 rounded-full bg-primary/20 text-white text-lg mb-4 inline-block"
@@ -190,11 +181,7 @@ const Home = () => {
 
             <AnimatePresence>
               {!showSplash && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <motion.h1
                     className="heading-primary text-5xl md:text-7xl mb-8"
                     variants={itemVariants}
@@ -301,8 +288,9 @@ const Home = () => {
           )}
         </AnimatePresence>
 
-        {/* Footer is given a higher z-index so it's definitely above the skyline. */}
+        {/* Footer with id for contact linking */}
         <motion.footer
+          id="contact"
           className="relative z-20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -311,13 +299,14 @@ const Home = () => {
           <Footer />
         </motion.footer>
 
+        {/* Synthwave Skyline */}
         <div className="absolute bottom-0 w-full pointer-events-none z-0">
           <div className="relative w-full">
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a001f] to-transparent" />
             <img
               src="/synthwave-sunset.png"
               alt="Synthwave Skyline"
-              className="w-full h-auto md:h-auto relative object-cover"
+              className="w-full h-24 md:h-auto relative object-cover"
             />
           </div>
         </div>

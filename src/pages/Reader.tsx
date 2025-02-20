@@ -52,9 +52,9 @@ const Reader = () => {
       let width: number, height: number;
 
       if (screenWidth < 768) {
-
         width = screenWidth - padding * 2;
-        height = width * standardPDFRatio * 2.5;
+        // For mobile, increase page height to use more of the screen
+        height = screenHeight - (navbarHeight + padding);
       } else {
         width = showTwoPages
           ? (screenWidth - padding * 3) / 2
@@ -448,6 +448,10 @@ const Reader = () => {
           }
           .perspective {
             perspective: 1500px;
+          }
+          /* For mobile, make the PDF container use full screen height */
+          #pdf-container {
+            min-height: 100vh;
           }
         }
       `}</style>
