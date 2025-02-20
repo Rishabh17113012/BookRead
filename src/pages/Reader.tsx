@@ -4,10 +4,9 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
 import Navbar from "./Navbar";
 
-// Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
-// Constants for optimization
+
 const PRELOAD_PAGES = 2;
 const CACHE_SIZE = 10;
 const RENDER_THROTTLE = 150;
@@ -25,7 +24,6 @@ const Reader = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
-  // Advanced caching system
   const pageCache = useRef<Map<number, any>>(new Map());
   const preloadQueue = useRef<Set<number>>(new Set());
   const pdfDocument = useRef<any>(null);
@@ -53,7 +51,7 @@ const Reader = () => {
 
       if (screenWidth < 768) {
         width = screenWidth - padding * 2;
-        // For mobile, increase page height to use more of the screen
+        
         height = screenHeight - (navbarHeight + padding);
       } else {
         width = showTwoPages
