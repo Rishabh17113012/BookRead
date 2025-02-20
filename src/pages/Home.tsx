@@ -61,8 +61,7 @@ const Home = () => {
   const EnhancedQuoteDisplay = ({ quote }: { quote: string }) => {
     return (
       <div className="relative max-w-3xl mx-auto mb-8">
-       
-        <div className="glitch-overlay absolute inset-0 pointer-events-none z-[-1]"></div>
+        <div className="glitch-overlay absolute inset-0 pointer-events-none z-[-1]" />
         <div className="relative p-1">
           <svg
             className="absolute inset-0 w-full h-full"
@@ -145,11 +144,10 @@ const Home = () => {
   return (
     <LayoutGroup>
       <div className="relative min-h-screen overflow-hidden">
-    
+        {/* BG layers */}
         <div className="synthwave-bg" />
         <div className="perspective-grid" />
-        {/* Sparkles overlay*/}
-        <div className="sparkles-overlay absolute inset-0 pointer-events-none z-[-2]"></div>
+        <div className="sparkles-overlay absolute inset-0 pointer-events-none z-[-2]" />
 
         <motion.nav
           initial={{ y: -100 }}
@@ -164,10 +162,10 @@ const Home = () => {
           </div>
         </motion.nav>
 
-        {/* Main content area (body) */}
+        {/* Main content area */}
+        {/* This container has a higher z-index so it's above the skyline. */}
         <div className="relative z-10 container mx-auto px-4 pt-24 pb-16">
-          {/* Internal glitch overlay */}
-          <div className="glitch-overlay absolute inset-0 pointer-events-none z-[-1]"></div>
+          <div className="glitch-overlay absolute inset-0 pointer-events-none z-[-1]" />
 
           <div className="text-center mb-16">
             <motion.div
@@ -248,28 +246,31 @@ const Home = () => {
                   <EnhancedQuoteDisplay quote={currentQuote} />
                 </motion.div>
 
-                <motion.div
-                  variants={itemVariants}
-                  className="synthwave-card max-w-3xl mx-auto"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent z-10"
-                      animate={{ opacity: [0.3, 0.5, 0.3] }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                    />
-                    <img
-                      src="/book-preview.jpg"
-                      alt="Book Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </motion.div>
+                <motion.img
+                  key="book-preview"
+                  src="/book-preview.png"
+                  alt="Book Preview"
+                  initial={{ opacity: 0, y: 20, rotateY: 20, scale: 0.7 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    rotateY: [20, 18, 20, 22, 20],
+                    scale: [0.7, 0.65, 0.75, 0.7],
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    ease: "linear",
+                  }}
+                  whileHover={{
+                    rotateY: 0,
+                    scale: 0.9,
+                    transition: { duration: 0.3, ease: "easeInOut" },
+                  }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mx-auto perspective-800 transform-gpu"
+                />
               </>
             )}
           </AnimatePresence>
@@ -300,13 +301,26 @@ const Home = () => {
           )}
         </AnimatePresence>
 
+        {/* Footer is given a higher z-index so it's definitely above the skyline. */}
         <motion.footer
+          className="relative z-20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.75, duration: 0.6 }}
         >
           <Footer />
         </motion.footer>
+
+        <div className="absolute bottom-0 w-full pointer-events-none z-0">
+          <div className="relative w-full">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a001f] to-transparent" />
+            <img
+              src="/synthwave-sunset.png"
+              alt="Synthwave Skyline"
+              className="w-full h-auto md:h-auto relative object-cover"
+            />
+          </div>
+        </div>
       </div>
     </LayoutGroup>
   );
