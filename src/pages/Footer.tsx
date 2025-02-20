@@ -5,7 +5,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="relative bg-gradient-to-t from-[#12002b] via-[#240046]/80 to-transparent text-white py-4 md:py-6 mt-12 border-t border-[#7209b7]/50 shadow-inner shadow-[#7209b7]/30">
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-4 md:px-6">
-        {/* Personal Section */}
+        {/* Developer Section */}
         <div className="text-center md:text-left md:w-1/3">
           <p className="text-xs md:text-sm text-[#dad8f7]">Designed & Developed by</p>
           <p className="text-base md:text-lg font-semibold text-[#f8f9fa] drop-shadow-lg">
@@ -45,8 +45,8 @@ const Footer: React.FC = () => {
         {/* Divider (Hidden on Mobile) */}
         <div className="hidden md:block h-12 w-[1px] bg-[#7209b7]/50"></div>
 
-        {/* Client Section */}
-        <div className="mt-4 md:mt-0 md:w-2/3 text-center">
+        {/* Client Section: centered on mobile, right-aligned on desktop */}
+        <div className="mt-4 md:mt-0 md:w-1/3 text-center md:text-right">
           <p className="text-base md:text-lg font-semibold text-[#f8f9fa] drop-shadow-lg">
             Bharati Vidyapeeth College of Engineering
           </p>
@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
           <p className="text-xs md:text-sm text-[#dad8f7]">Stay connected :)</p>
 
           {/* Client Social Icons */}
-          <div className="flex justify-center space-x-4 mt-2">
+          <div className="flex justify-center md:justify-end space-x-4 mt-2">
             <a
               href="https://www.linkedin.com/school/bvpcoe/"
               target="_blank"
