@@ -59,6 +59,7 @@ export const quotes: string[] = [
     "Some men just want to watch the world burn.",
     "The only limit to our realization of tomorrow is our doubts of today.",
     "In the middle of every difficulty lies opportunity.",
-    "Keep moving forward."
+    "Keep moving forward.",
+    "You're no God... I renounce you"
   ];
   
