@@ -3,11 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaBars, FaTimes } from "react-icons/fa";
 
-const NavbarHome : React.FC = () => {
+const NavbarHome: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
-  
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.hash]);
@@ -19,14 +18,29 @@ const NavbarHome : React.FC = () => {
       transition={{ type: "spring", stiffness: 50, damping: 15 }}
       className="fixed top-0 w-full bg-card/90 backdrop-blur-lg border-b border-primary/30 z-50"
     >
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container relative mx-auto px-4 h-16 flex items-center justify-between">
       
-        <Link to="/#art-of-reading" className="nav-link text-2xl font-bold">
-          Genre Magazine 2025
+        <Link
+          to="/#art-of-reading"
+          className="nav-link text-xl md:text-2xl font-bold"
+        >
+          Genre 2K25
         </Link>
-        
+
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          <img
+            src="./book-preview.png" 
+            alt="Book Preview"
+            className="h-8 md:h-10 object-contain"
+          />
+        </div>
+
+        {/* Desktop Navigation */}
         <div className="hidden md:flex space-x-6">
-          <Link to="/#art-of-reading" className="nav-link hover:text-[#4cc9f0] transition">
+          <Link
+            to="/#art-of-reading"
+            className="nav-link hover:text-[#4cc9f0] transition"
+          >
             Home
           </Link>
           <a
@@ -37,20 +51,29 @@ const NavbarHome : React.FC = () => {
           >
             Bhartiyam
           </a>
-          <Link to="/#contact" className="nav-link hover:text-[#4cc9f0] transition">
+          <Link
+            to="/#contact"
+            className="nav-link hover:text-[#4cc9f0] transition"
+          >
             Contact
           </Link>
         </div>
+
         {/* Mobile Hamburger */}
         <div className="md:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="text-white focus:outline-none"
           >
-            {isMenuOpen ? <FaTimes className="w-6 h-6" /> : <FaBars className="w-6 h-6" />}
+            {isMenuOpen ? (
+              <FaTimes className="w-6 h-6" />
+            ) : (
+              <FaBars className="w-6 h-6" />
+            )}
           </button>
         </div>
       </div>
+
       {/* Mobile Navigation Menu */}
       <AnimatePresence>
         {isMenuOpen && (

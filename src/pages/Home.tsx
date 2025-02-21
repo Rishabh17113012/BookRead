@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import Footer from "@/pages/Footer";
-import Navbar from "@/pages/NavbarHome"; 
+import Navbar from "@/pages/NavbarHome";
 import { quotes } from "./quotes";
 
 const Home = () => {
@@ -118,7 +118,7 @@ const Home = () => {
             </rect>
           </svg>
 
-          {/* 3D quote */}
+          {/*  Quote */}
           <div className="relative p-6 transform-gpu perspective-800">
             <AnimatePresence mode="wait">
               <motion.p
@@ -145,7 +145,7 @@ const Home = () => {
   return (
     <LayoutGroup>
       <div className="relative min-h-screen overflow-hidden">
-        {/* BG layers */}
+        {/* Background Layers */}
         <div className="synthwave-bg" />
         <div className="perspective-grid" />
         <div className="sparkles-overlay absolute inset-0 pointer-events-none z-[-2]" />
@@ -153,7 +153,7 @@ const Home = () => {
         {/* Navbar */}
         <Navbar />
 
-        {/* Main content area */}
+        {/* Main Content Area */}
         <div className="relative z-10 container mx-auto px-4 pt-24 pb-16">
           <div className="glitch-overlay absolute inset-0 pointer-events-none z-[-1]" />
 
@@ -263,6 +263,7 @@ const Home = () => {
           </AnimatePresence>
         </div>
 
+       
         <AnimatePresence>
           {showSplash && (
             <motion.div
@@ -276,7 +277,7 @@ const Home = () => {
               <motion.div
                 layoutId="logo"
                 transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                className="flex items-center justify-center mx-auto max-w-[80%] max-h-[80vh]"
+                className="flex items-center justify-center w-full h-full"
               >
                 <img
                   src="/Genre_Logo.png"
@@ -288,7 +289,17 @@ const Home = () => {
           )}
         </AnimatePresence>
 
-        {/* Footer with id for contact linking */}
+        <div className="w-full pointer-events-none">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a001f] to-transparent" />
+            <img
+              src="/synthwave-sunset.png"
+              alt="Synthwave Skyline"
+              className="w-full h-40 md:h-auto object-cover"
+            />
+          </div>
+        </div>
+
         <motion.footer
           id="contact"
           className="relative z-20"
@@ -298,18 +309,6 @@ const Home = () => {
         >
           <Footer />
         </motion.footer>
-
-        {/* Synthwave Skyline */}
-        <div className="absolute bottom-0 w-full pointer-events-none z-0">
-          <div className="relative w-full">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a001f] to-transparent" />
-            <img
-              src="/synthwave-sunset.png"
-              alt="Synthwave Skyline"
-              className="w-full h-24 md:h-auto relative object-cover"
-            />
-          </div>
-        </div>
       </div>
     </LayoutGroup>
   );
