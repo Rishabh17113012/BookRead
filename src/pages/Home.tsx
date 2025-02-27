@@ -13,9 +13,9 @@ const Home = () => {
   );
 
   const pdfFiles = [
-    { name: "Genre 2024", file: "magazine24.pdf" },
-    { name: "Genre 2023", file: "magazine23.pdf" },
-    { name: "Genre 2019", file: "magazine19.pdf" },
+    { name: "Genre 2k25", file: "magazine25.pdf" },
+    { name: "Genre 2k24", file: "magazine24.pdf" },
+    { name: "Genre 2k23", file: "magazine23.pdf" },
   ];
 
   useEffect(() => {
@@ -72,7 +72,13 @@ const Home = () => {
             }}
           >
             <defs>
-              <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient
+                id="neonGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
                 <stop offset="0%" stopColor="#ff0000" stopOpacity="0.0">
                   <animate
                     attributeName="stopColor"
@@ -181,20 +187,25 @@ const Home = () => {
 
             <AnimatePresence>
               {!showSplash && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
                   <motion.h1
-                    className="heading-primary text-5xl md:text-7xl mb-8"
+                    className="heading-primary text-5xl md:text-7xl mb-8 font-aladdin"
                     variants={itemVariants}
                     data-text="The Art of Reading"
                   >
                     The Art of Reading
                   </motion.h1>
+
                   <motion.p
                     className="text-glow text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed"
                     variants={itemVariants}
                   >
-                    Immerse yourself in a distraction-free reading experience and
-                    discover the hidden talents of your peers.
+                    Immerse yourself in a distraction-free reading experience
+                    and discover the hidden talents of your peers.
                   </motion.p>
                 </motion.div>
               )}
@@ -263,7 +274,6 @@ const Home = () => {
           </AnimatePresence>
         </div>
 
-       
         <AnimatePresence>
           {showSplash && (
             <motion.div
